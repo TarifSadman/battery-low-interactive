@@ -1,64 +1,148 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Row, Col, Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import Papa from 'papaparse';
+import React, { useEffect, useState } from 'react';
+import { Form, Input, Button, Row, Col, message, Table } from 'antd';
+import CSVReader from 'react-csv-reader';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import ResultPDF from './PDF';
 
 const App = () => {
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
   const [csvData, setCSVData] = useState(null);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [client, setClient] = useState('');
-  const [contractor, setContractor] = useState('');
+  const [formData, setFormData] = useState({
+    max_X: '',
+    min_X: '',
+    max_Y: '',
+    min_Y: '',
+    max_Z: '',
+    min_Z: '',
+  });
+  const [showTable, setShowTable] = useState(false);
 
-  const handleCSVUpload = (file) => {
-    Papa.parse(file, {
-      complete: (result) => {
-        setCSVData(result.data);
-        message.success('CSV file uploaded successfully');
-        console.log(result.data, 'result');
-      },
-      header: true,
+  useEffect(() => {
+    console.log(formData);
+  }, [formData, "FDATAX"]);
+
+  const handleForce = (data, fileInfo) => {
+    console.log(data, fileInfo);
+  
+    // Combine arrays into a single array
+    const combinedArray = data.reduce((accumulator, currentArray) => {
+      return accumulator.concat(currentArray);
+    }, []);
+  
+    // Extract X, Y, and Z values into separate arrays
+    const xValues = combinedArray.map(obj => obj.x);
+    const yValues = combinedArray.map(obj => obj.y);
+    const zValues = combinedArray.map(obj => obj.z);
+  
+  const maxX = Math.max(...xValues);
+  const maxY = Math.max(...yValues);
+  const maxZ = Math.max(...zValues);
+
+  const minX = Math.min(...xValues);
+  const minY = Math.min(...yValues);
+  const minZ = Math.min(...zValues);
+
+  console.log('Max X:', maxX);
+  console.log('Max Y:', maxY);
+  console.log('Max Z:', maxZ);
+
+  console.log('Min X:', minX);
+  console.log('Min Y:', minY);
+  console.log('Min Z:', minZ);
+  
+  setFormData({
+    ...formData,
+    max_X: maxX.toString(),
+    min_X: minX.toString(),
+    max_Y: maxY.toString(),
+    min_Y: minY.toString(),
+    max_Z: maxZ.toString(),
+    min_Z: minZ.toString(),
+  });
+  console.log(formData, "FDATA");
+  };
+
+  useEffect(() => {
+    form.setFieldsValue({
+      max_X: formData.max_X,
+      min_X: formData.min_X,
+      max_Y: formData.max_Y,
+      min_Y: formData.min_Y,
+      max_Z: formData.max_Z,
+      min_Z: formData.min_Z,
     });
+  }, [formData]);
+
+  const papaparseOptions = {
+    header: true,
+    dynamicTyping: true,
+    skipEmptyLines: true,
+    transformHeader: header => header.toLowerCase().replace(/\W/g, "_")
   };
-
-  const handleName = (e) => {
-    setName(e.target.value);
-    console.log(name, "name");
-  };
-
-  // const handleDescription = (e) => {
-  //   setDescription(e.target.value);
-  //   console.log(description, "description");
-  // };
-
-  // const handleClient = (e) => {
-  //   setClient(e.target.value);
-  //   console.log(client, "client");
-  // };
-
-  // const handleContractor = (e) => {
-  //   setContractor(e.target.value);
-  //   console.log(contractor, "contractor");
-  // };
-
 
   const handleFormSubmit = (values) => {
     if (step === 1) {
       setStep(2);
       message.success('Step 1 completed successfully');
     } else {
+      setShowTable(true);
       console.log(' Form Values:', { ...values, ...csvData });
     }
   };
+
+  const dataSource = [
+    {
+      key: 'max_X',
+      label: 'Max X',
+      value: formData.max_X,
+    },
+    {
+      key: 'min_X',
+      label: 'Min X',
+      value: formData.min_X,
+    },
+    {
+        key: 'max_Y',
+        label: 'Max Y',
+        value: formData.max_Y,
+    },
+    {
+        key: 'min_Y',
+        label: 'Min Y',
+        value: formData.min_Y,
+    },
+    {
+        key: 'max_Z',
+        label: 'Max Z',
+        value: formData.max_Z,
+    },
+    {
+        key: 'min_Z',
+        label: 'Min Z',
+        value: formData.min_Z,
+    }
+  ];
+
+  const columns = [
+    {
+      title: 'Max / Min',
+      dataIndex: 'label',
+      key: 'label',
+    },
+    {
+      title: 'Value',
+      dataIndex: 'value',
+      key: 'value',
+    },
+  ];
 
   return (
     <div style={{ padding: '20px' }}>
       <Form
         form={form}
         onFinish={handleFormSubmit}
-        initialValues={csvData}
+        initialValues={formData}
       >
         <Row gutter={[16, 16]}>
           <Col span={12}>
@@ -67,7 +151,7 @@ const App = () => {
               name="projectName"
               rules={[{ required: true, message: 'Please enter project name' }]}
             >
-              <Input onChange={handleName} disabled={step === 2} />
+              <Input disabled={step === 2} />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -100,61 +184,63 @@ const App = () => {
           {step === 2 && (
             <>
               <Col span={12}>
-                <Form.Item label="Max X" name="max_X">
-                  <Input disabled />
+                <Form.Item key={formData.max_X} label="Max X" name="max_X">
+                  <Input value={formData.max_X} />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Min X" name="min_X">
-                  <Input disabled />
+                <Form.Item key={formData.min_X} label="Min X" name="min_X">
+                  <Input value={formData.min_X} />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Max Y" name="max_Y">
-                  <Input disabled />
+                <Form.Item key={formData.max_Y} label="Max Y" name="max_Y">
+                  <Input value={formData.max_Y} />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Min Y" name="min_Y">
-                  <Input disabled />
+                <Form.Item key={formData.min_Y} label="Min Y" name="min_Y">
+                  <Input value={formData.min_Y} />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Max Z" name="max_Z">
-                  <Input disabled />
+                <Form.Item key={formData.max_Z} label="Max Z" name="max_Z">
+                  <Input value={formData.max_Z} />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item label="Min Z" name="min_Z">
-                  <Input disabled />
+                <Form.Item key={formData.min_Z} label="Min Z" name="min_Z">
+                  <Input value={formData.min_Z} />
                 </Form.Item>
               </Col>
           <Col span={12}>
-            <Form.Item label="CSV Upload">
-              <Upload
-                beforeUpload={() => false}
-                accept=".csv"
-                onChange={(info) => {
-                  if (info.file.status === 'done') {
-                    handleCSVUpload(info.file.originFileObj);
-                  }
-                }}
-              >
-                <Button onClick={handleCSVUpload} icon={<UploadOutlined />}>
-                  Upload CSV
-                </Button>
-              </Upload>
-            </Form.Item>
+            <CSVReader
+                cssClass="csv-reader-input"
+                label="Select CSV file"
+                onFileLoaded={handleForce}
+                onError={() => console.error('Error reading CSV file')}
+                parserOptions={papaparseOptions}
+              />
           </Col>
           </>
           )}
         </Row>
-        <Form.Item>
+        <Form.Item style={{ paddingTop: 10 }}>
           <Button type="primary" htmlType="submit">
             {step === 1 ? 'Next' : 'Submit'}
           </Button>
         </Form.Item>
       </Form>
+      {showTable && (
+      <>
+        <Table dataSource={dataSource} columns={columns} />
+        <PDFDownloadLink document={<ResultPDF formData={formData} />} fileName="result.pdf">
+            {({ loading, error }) =>
+              loading ? 'Loading document...' : 'Download PDF'
+            }
+          </PDFDownloadLink>
+      </>
+      )}
     </div>
   );
 };
