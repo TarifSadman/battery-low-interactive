@@ -183,32 +183,32 @@ const App = () => {
             <>
               <Col span={12}>
                 <Form.Item key="max_X" label="Max X" name="max_X">
-                  <Input />
+                  <Input type='number' />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item key="min_X" label="Min X" name="min_X">
-                  <Input />
+                  <Input type='number' />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item key="max_Y" label="Max Y" name="max_Y">
-                  <Input />
+                  <Input type='number' />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item key="min_Y" label="Min Y" name="min_Y">
-                  <Input />
+                  <Input type='number' />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item key="max_Z" label="Max Z" name="max_Z">
-                  <Input />
+                  <Input type='number' />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item key="min_Z" label="Min Z" name="min_Z">
-                  <Input />
+                  <Input type='number' />
                 </Form.Item>
               </Col>
           <Col span={12}>
