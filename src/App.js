@@ -7,7 +7,6 @@ import ResultPDF from './PDF';
 const App = () => {
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
-  const [csvData, setCSVData] = useState(null);
   const [formData, setFormData] = useState({
     max_X: '',
     min_X: '',
@@ -60,7 +59,6 @@ const App = () => {
     max_Z: maxZ.toString(),
     min_Z: minZ.toString(),
   });
-  console.log(formData, "FDATA");
   };
 
   useEffect(() => {
@@ -86,10 +84,10 @@ const App = () => {
       setStep(2);
       message.success('Step 1 completed successfully');
     } else {
+      setFormData({ ...formData, ...values });
       setShowTable(true);
-      console.log(' Form Values:', { ...values, ...csvData });
     }
-  };
+  }
 
   const dataSource = [
     {
@@ -184,33 +182,33 @@ const App = () => {
           {step === 2 && (
             <>
               <Col span={12}>
-                <Form.Item key={formData.max_X} label="Max X" name="max_X">
-                  <Input value={formData.max_X} />
+                <Form.Item key="max_X" label="Max X" name="max_X">
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item key={formData.min_X} label="Min X" name="min_X">
-                  <Input value={formData.min_X} />
+                <Form.Item key="min_X" label="Min X" name="min_X">
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item key={formData.max_Y} label="Max Y" name="max_Y">
-                  <Input value={formData.max_Y} />
+                <Form.Item key="max_Y" label="Max Y" name="max_Y">
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item key={formData.min_Y} label="Min Y" name="min_Y">
-                  <Input value={formData.min_Y} />
+                <Form.Item key="min_Y" label="Min Y" name="min_Y">
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item key={formData.max_Z} label="Max Z" name="max_Z">
-                  <Input value={formData.max_Z} />
+                <Form.Item key="max_Z" label="Max Z" name="max_Z">
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={12}>
-                <Form.Item key={formData.min_Z} label="Min Z" name="min_Z">
-                  <Input value={formData.min_Z} />
+                <Form.Item key="min_Z" label="Min Z" name="min_Z">
+                  <Input />
                 </Form.Item>
               </Col>
           <Col span={12}>
